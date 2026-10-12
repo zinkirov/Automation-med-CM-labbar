@@ -1,0 +1,53 @@
+# SSH keys and local SSH configuration
+.ssh/
+**/ansible_lab
+**/ansible_lab.pub
+**/id_rsa*
+**/id_ed25519*
+**/id_ecdsa*
+**/devops_admin
+**/devops_admin.pub
+*.pem
+*.key
+
+# Local credentials: encrypted vault.yml files may be committed
+.vault_pass*
+.vault-password*
+.env
+.env.*
+!.env.example
+credentials.*
+secrets.*
+
+# Virtual machines and installation media
+*.iso
+*.qcow2
+*.img
+*.vdi
+*.vmdk
+*.vhd
+*.vhdx
+*.ova
+*.ovf
+
+# Runtime output and caches
+*.retry
+*.log
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ansible/
+
+# Editor and OS files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Do not ignore screenshots, reports, YAML or encrypted Vault files
+
