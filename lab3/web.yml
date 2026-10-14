@@ -1,0 +1,10 @@
+---
+- name: Installera webbserver på node1
+  hosts: webservers
+  become: true
+
+  tasks:
+    - name: Installera Nginx
+      ansible.builtin.apt:
+        name: nginx
+        state: present
