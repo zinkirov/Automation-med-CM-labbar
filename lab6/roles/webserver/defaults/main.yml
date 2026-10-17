@@ -1,0 +1,8 @@
+---
+web_package: nginx
+maintenance_mode: true
+http_port: 8080
+app_environments:
+  - development
+  - test
+  - production

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <title>Serverinformation</title>
+</head>
+<body>
+<h1>Hello from {{ ansible_facts['hostname'] }}</h1>
+<p>Operating system: {{ ansible_facts['distribution'] }}</p>
+<p>Ip address: {{ ansible_facts['default_ipv4']['address'] }}</p>
+{% if maintenance_mode %}
+<p>Sidan är under underhåll.</p>
+{% else %}
+<p>Välkommen till vår webbplats!</p>
+{% endif %}
+<ul>
+{% for environment in app_environments %}
+  <li>{{ environment }}</li>
+{% endfor %}
+</ul>
+</body>
+</html>

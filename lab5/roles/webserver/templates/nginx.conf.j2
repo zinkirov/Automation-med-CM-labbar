@@ -1,0 +1,12 @@
+events {
+    worker_connections 1024;
+}
+
+http {
+    server {
+        listen {{ http_port }};
+        server_name {{ ansible_facts['hostname'] }};
+        root /var/www/html;
+        index index.html;
+    }
+}
