@@ -1,0 +1,25 @@
+---
+- name: en uppgift som installerar MariaDB
+  ansible.builtin.apt:
+    name: mariadb-server
+    state: present
+
+- name: Körs och startar automatiskt vid uppstart
+  ansible.builtin.service:
+    name: mariadb
+    state: started
+    enabled: true
+
+- name: Installera Python-paket på node2
+  ansible.builtin.apt:
+    name: python3-pymysql
+    state: present
+
+- name: Skapar en användare i MariaDB
+  community.mysql.mysql_user:
+    name: lab_user
+    state: present
+    password: "{{ vault_db_password }}"
+    login_user: root
+    login_unix_socket: /run/mysqld/mysqld.sock
+  no_log: true

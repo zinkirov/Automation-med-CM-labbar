@@ -1,0 +1,6 @@
+---
+- name: Installera Mariadb
+  hosts: dbservers
+  become: true
+  roles:
+    - database
