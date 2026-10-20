@@ -1,0 +1,15 @@
+---
+- name: Samla in serverinformation och skapa cmdb-rapporter
+  hosts: all
+  gather_facts: true
+
+  tasks:
+    - name: Samla in installerade paket
+      ansible.builtin.package_facts:
+        manager: auto
+
+    - name: Skapa en cmdb-rapport per server
+      ansible.builtin.template:
+        src: inventory_report.md.j2
+        dest: "./reports/inventory_report{{ inventory_hostname }}.md"
+      delegate_to: localhost

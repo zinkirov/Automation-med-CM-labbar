@@ -1,0 +1,16 @@
+# CMDB-rapport: {{ inventory_hostname }}
+
+## Serverdetaljer
+- **hostname:** {{ ansible_facts['hostname'] }}
+- **Operativsystem:** {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}
+- **RAM totalt:** {{ ansible_facts['memtotal_mb'] }} MB
+- **RAM ledigt:** {{ansible_facts['memfree_mb'] }} MB
+- **Antal vCPU:** {{ansible_facts['processor_vcpus'] }}
+- **IPv4-adresser:** {{ansible_facts['all_ipv4_addresses'] | join(', ') }}
+- **IPv6-adresser:** {{ansible_facts['all_ipv6_addresses'] | join(', ') }}
+- **Upptid:** {{ (ansible_facts['uptime_seconds'] / 3600) | round(2) }} timmar
+- **Disk vda:** {{ ansible_facts['devices']['vda']['size'] }}
+## Installerade paket
+{% for package in ansible_facts['packages'] | sort %}
+- {{ package }}
+{% endfor %}
