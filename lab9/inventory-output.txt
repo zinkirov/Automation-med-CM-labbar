@@ -1,0 +1,17 @@
+{
+    "_meta": {
+        "hostvars": {}
+    },
+    "all": {
+        "children": [
+            "ungrouped",
+            "labservers"
+        ]
+    },
+    "labservers": {
+        "hosts": [
+            "node1",
+            "node2"
+        ]
+    }
+}
