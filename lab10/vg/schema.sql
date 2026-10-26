@@ -1,0 +1,16 @@
+CREATE TABLE IF NOT EXISTS services (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    url VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS checks (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    service_id INT NOT NULL,
+    checked_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    is_up BOOLEAN NOT NULL,
+    status_code SMALLINT NULL,
+    response_ms INT NULL,
+    error_message VARCHAR(255) NULL,
+    FOREIGN KEY (service_id) REFERENCES services(id)
+);

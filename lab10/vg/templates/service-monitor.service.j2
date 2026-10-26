@@ -1,0 +1,15 @@
+[Unit]
+Description=Service Monitor Flask-app
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/service-monitor
+EnvironmentFile=/etc/service-monitor.env
+ExecStart=/opt/service-monitor/venv/bin/gunicorn --workers 2 --bind 127.0.0.1:8000 app:app
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

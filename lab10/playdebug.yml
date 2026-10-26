@@ -1,0 +1,51 @@
+---
+- name: Samla fakta från alla noder
+  hosts: all
+  gather_facts: true
+
+- name: Skicka API-skriptet till node2
+  hosts: node2
+  tasks:
+    - name: Skapa API-skript
+      ansible.builtin.template:
+        src: templates/api_server.py.j2
+        dest: /tmp/api_server.py
+        mode: '0644'
+    - name: Kontrollera om API redan kör
+      ansible.builtin.command: pgrep -f '^python3 /tmp/api_server.py$'
+      register: api_running
+      failed_when: false
+      changed_when: false
+
+    - name: Starta API i bakgrunden
+      ansible.builtin.shell: "nohup python3 /tmp/api_server.py > /tmp/api.log 2>&1 &"
+      when: api_running.rc != 0
+
+    - name: Vänta tills API svarar på port 5000
+      ansible.builtin.wait_for:
+        port: 5000
+        timeout: 10    
+
+- name: Skicka webbskriptet till node1
+  hosts: node1
+  tasks:
+    - name: Skapa webbskript
+      ansible.builtin.template:
+        src: templates/web_client.py.j2
+        dest: /tmp/web_client.py
+        mode: '0644'
+
+    - name: Kontrollera om webbklienten redan kör
+      ansible.builtin.command: pgrep -f '^python3 /tmp/web_client.py$'
+      register: web_running
+      failed_when: false
+      changed_when: false
+            
+    - name: Starta webbklienten i bakgrunden
+      ansible.builtin.shell: "nohup python3 /tmp/web_client.py > /tmp/web.log 2>&1 &"
+      when: web_running.rc != 0
+
+    - name: Vänta tills webbklienten svarar på port 8081
+      ansible.builtin.wait_for:
+        port: 8081
+        timeout: 10

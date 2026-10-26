@@ -1,0 +1,8 @@
+---
+- name: Samla fakta från noderna
+  hosts: all
+  gather_facts: true
+  tasks: []
+
+- ansible.builtin.import_playbook: vg-db.yml
+- ansible.builtin.import_playbook: vg-web.yml

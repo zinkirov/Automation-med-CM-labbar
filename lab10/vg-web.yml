@@ -1,0 +1,128 @@
+---
+- name: Installera VG-appen på node1
+  hosts: webservers
+  become: true
+  vars_files:
+    - vg/secrets.yml
+
+  tasks:
+    - name: Installera Pythonverktyg
+      ansible.builtin.apt:
+        name:
+          - python3-venv
+          - python3-pip
+          - python3-setuptools
+        state: present
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Skapa appkatalog
+      ansible.builtin.file:
+        path: /opt/service-monitor
+        state: directory
+        mode: '0755'
+
+    - name: Kopiera appen
+      ansible.builtin.copy:
+        src: vg/app/app.py
+        dest: /opt/service-monitor/app.py
+        mode: '0644'
+      notify: Starta om Gunicorn
+
+    - name: Skapa katalog för Flask-mallar
+      ansible.builtin.file:
+        path: /opt/service-monitor/templates
+        state: directory
+        mode: '0755'
+
+    - name: Kopiera webbsidan
+      ansible.builtin.copy:
+        src: vg/app/templates/index.html
+        dest: /opt/service-monitor/templates/index.html
+        mode: '0644'
+      notify: Starta om Gunicorn      
+
+    - name: Kopiera Pythonberoenden
+      ansible.builtin.copy:
+        src: vg/app/requirements.txt
+        dest: /opt/service-monitor/requirements.txt
+        mode: '0644'
+
+    - name: Installera appens Pythonberoenden
+      ansible.builtin.pip:
+        requirements: /opt/service-monitor/requirements.txt
+        virtualenv: /opt/service-monitor/venv
+        virtualenv_command: python3 -m venv
+      notify: Starta om Gunicorn
+
+    - name: Skapa appens databasinställningar
+      ansible.builtin.copy:
+        dest: /etc/service-monitor.env
+        mode: '0600'
+        content: |
+          DB_HOST={{ hostvars[groups['dbservers'][0]].ansible_default_ipv4.address }}
+          DB_PASSWORD={{ db_password | to_json }}
+      no_log: true
+      notify: Starta om Gunicorn
+
+    - name: Installera Gunicorn-tjänsten
+      ansible.builtin.template:
+        src: vg/templates/service-monitor.service.j2
+        dest: /etc/systemd/system/service-monitor.service
+        mode: '0644'
+      notify: Starta om Gunicorn
+
+    - name: Aktivera och starta appen
+      ansible.builtin.systemd_service:
+        name: service-monitor
+        daemon_reload: true
+        enabled: true
+        state: started
+
+    - name: Säkerställ att Nginx är installerat
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+
+    - name: Skapa Nginx-konfiguration för VG-appen
+      ansible.builtin.template:
+        src: vg/templates/service-monitor.nginx.j2
+        dest: /etc/nginx/sites-available/service-monitor
+        mode: '0644'
+      notify: Ladda om Nginx
+
+    - name: Aktivera VG-appen i Nginx
+      ansible.builtin.file:
+        src: /etc/nginx/sites-available/service-monitor
+        dest: /etc/nginx/sites-enabled/service-monitor
+        state: link
+      notify: Ladda om Nginx
+
+    - name: Låt Nginx läsa webbplatsfiler
+      ansible.builtin.lineinfile:
+        path: /etc/nginx/nginx.conf
+        insertafter: '^http \{'
+        line: '    include /etc/nginx/sites-enabled/*;'
+        state: present
+      notify: Ladda om Nginx      
+
+    - name: Kontrollera Nginx-konfigurationen
+      ansible.builtin.command: nginx -t
+      changed_when: false
+
+    - name: Aktivera och starta Nginx
+      ansible.builtin.service:
+        name: nginx
+        enabled: true
+        state: started        
+
+  handlers:
+    - name: Starta om Gunicorn
+      ansible.builtin.systemd_service:
+        name: service-monitor
+        daemon_reload: true
+        state: restarted
+    - name: Ladda om Nginx
+      ansible.builtin.service:
+        name: nginx
+        state: reloaded
