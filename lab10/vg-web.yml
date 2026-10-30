@@ -101,6 +101,7 @@
     - name: Låt Nginx läsa webbplatsfiler
       ansible.builtin.lineinfile:
         path: /etc/nginx/nginx.conf
+        regexp: '^\s*include /etc/nginx/sites-enabled/\*;'
         insertafter: '^http \{'
         line: '    include /etc/nginx/sites-enabled/*;'
         state: present

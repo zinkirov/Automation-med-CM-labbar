@@ -3,6 +3,7 @@ events {
 }
 
 http {
+    include /etc/nginx/sites-enabled/*;
     server {
         listen {{ http_port }};
         server_name {{ ansible_facts['hostname'] }};
